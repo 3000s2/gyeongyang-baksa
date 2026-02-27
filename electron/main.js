@@ -202,6 +202,7 @@ function initDB() {
   db.exec('CREATE INDEX IF NOT EXISTS idx_po_items_po ON po_items(po_id)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_po_status ON purchase_orders(order_status)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_po_pay ON purchase_orders(payment_status)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_po_delivered ON purchase_orders(delivered,order_date)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_exp_date ON expenses(date)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_exp_name ON expenses(name)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_cust_cid ON customers(cust_id)');

@@ -85,14 +85,16 @@ function renderPager(total,cur,fn){const tp=Math.ceil(total/PG);if(tp<=1)return 
 function setupAutocomplete(inputId, getData, onSelect) {
   const inp = $('#'+inputId);
   if(!inp) return;
-  // Remove any existing autocomplete list on this input
-  const existing = inp.parentNode.querySelector('.autocomplete-list');
+  // Remove any existing autocomplete list on this input's container
+  const container = inp.closest('[style*="position"]') || inp.parentNode;
+  const existing = container.querySelector('.autocomplete-list');
   if(existing) existing.remove();
 
   let listEl = document.createElement('div');
   listEl.className = 'autocomplete-list';
-  inp.parentNode.style.position = 'relative';
-  inp.parentNode.appendChild(listEl);
+  // Only set position:relative if not already set
+  if(!container.style.position) container.style.position = 'relative';
+  container.appendChild(listEl);
 
   const hideList = () => { listEl.style.display = 'none'; listEl.style.pointerEvents = 'none'; };
   const showList = () => { listEl.style.display = 'block'; listEl.style.pointerEvents = 'auto'; };
@@ -579,7 +581,7 @@ window.glfSyncFromCatalog=async()=>{
 // ============================================================
 // PO CREATE (Purchase Orders = Sales orders from customers)
 // ============================================================
-let _poPg=1;let _poSort='date_desc';
+let _poPg=1;let _poSort='date_desc';let _poUndeliv=false;
 async function loadPO(){destroyCharts();$('#hd').innerText='PO Create';
   const glfOn=(await api.query("SELECT glf_enabled,glf_api_key FROM company_info WHERE id=1")).data[0];
   const showGlf=glfOn&&glfOn.glf_enabled&&glfOn.glf_api_key;
@@ -590,13 +592,14 @@ async function loadPO(){destroyCharts();$('#hd').innerText='PO Create';
     <div class="filter-bar">
       <div class="fg"><label>From</label><input type="date" id="poFrom" value="${_f.po.from}"></div>
       <div class="fg"><label>To</label><input type="date" id="poTo" value="${_f.po.to}"></div>
-      <div class="fg" style="flex:1"><label>Search (Customer Name/ID)</label><input id="poSrch" placeholder="Customer name or ID..." value="${_f.po.sr}"></div>
+      <div class="fg" style="flex:1"><label>Search (Customer Name/ID)</label><div style="position:relative"><input id="poSrch" placeholder="Customer name or ID..." value="${_f.po.sr}" autocomplete="off"></div></div>
       <div class="fg"><label>Sort</label><select id="poSortSel" onchange="_poSort=this.value;refreshPO(1)">
         <option value="date_desc"${_poSort==='date_desc'?' selected':''}>Order Date ↓</option>
         <option value="date_asc"${_poSort==='date_asc'?' selected':''}>Order Date ↑</option>
         <option value="del_asc"${_poSort==='del_asc'?' selected':''}>Delivery Date ↑ (빠른순)</option>
         <option value="del_desc"${_poSort==='del_desc'?' selected':''}>Delivery Date ↓</option>
       </select></div>
+      <button class="btn ${_poUndeliv?'red':''}" id="poUndelBtn" onclick="_poUndeliv=!_poUndeliv;this.className='btn '+(_poUndeliv?'red':'');this.textContent=_poUndeliv?'🚚 배달전 ON':'🚚 배달전';refreshPO(1)" style="white-space:nowrap">${_poUndeliv?'🚚 배달전 ON':'🚚 배달전'}</button>
       <button class="btn" onclick="refreshPO(1)">Search</button>
     </div>
     <div id="poT"><div class="loading">로딩 중...</div></div>`;
@@ -615,6 +618,7 @@ window.refreshPO=async(pg)=>{_poPg=pg||1;showLoading('#poT');
   const from=_f.po.from,to=_f.po.to,sr=_f.po.sr;
   let w="po.order_date>=? AND po.order_date<=?",p=[from,to];
   if(sr){w+=" AND (c.name LIKE ? OR c.cust_id LIKE ?)";p.push('%'+sr+'%','%'+sr+'%');}
+  if(_poUndeliv){w+=" AND po.delivered=0";}
   const sortMap={date_desc:'po.order_date DESC,po.id DESC',date_asc:'po.order_date ASC,po.id ASC',del_asc:"CASE WHEN po.delivery_date='' OR po.delivery_date IS NULL THEN 1 ELSE 0 END,po.delivery_date ASC,po.id ASC",del_desc:"CASE WHEN po.delivery_date='' OR po.delivery_date IS NULL THEN 1 ELSE 0 END,po.delivery_date DESC,po.id DESC"};
   const orderBy=sortMap[_poSort]||sortMap.date_desc;
   const tot=(await api.query(`SELECT COUNT(*) as cnt FROM purchase_orders po LEFT JOIN customers c ON po.customer_id=c.id WHERE ${w}`,p)).data[0]?.cnt||0;
