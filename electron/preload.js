@@ -19,5 +19,12 @@ contextBridge.exposeInMainWorld('api', {
   glfStopAutoPoll: () => ipcRenderer.invoke('glf-stop-autopoll'),
   onGlfAutoPoll: (callback) => ipcRenderer.on('glf-auto-poll-result', (e, result) => callback(result)),
   gmapGeocode: (address) => ipcRenderer.invoke('gmap-geocode', address),
-  gmapDirections: (origin, destination, waypoints) => ipcRenderer.invoke('gmap-directions', origin, destination, waypoints)
+  gmapDirections: (origin, destination, waypoints) => ipcRenderer.invoke('gmap-directions', origin, destination, waypoints),
+  loadSeedData: () => ipcRenderer.invoke('load-seed-data'),
+  updateDownload: () => ipcRenderer.invoke('update-download'),
+  updateInstall: () => ipcRenderer.invoke('update-install'),
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (e, info) => callback(info)),
+  onUpdateProgress: (callback) => ipcRenderer.on('update-progress', (e, info) => callback(info)),
+  onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', () => callback())
 });

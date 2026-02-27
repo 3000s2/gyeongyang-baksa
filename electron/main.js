@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
 const XLSX = require('xlsx');
+const { autoUpdater } = require('electron-updater');
 
 let db, win;
 let glfAutoTimer = null;
@@ -326,6 +327,35 @@ app.whenReady().then(() => {
 
   // Start GloriaFood auto-polling if enabled
   glfStartAutoPoll();
+
+  // ---- Auto-Updater ----
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('update-available', (info) => {
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('update-available', { version: info.version, releaseNotes: info.releaseNotes || '' });
+    }
+  });
+
+  autoUpdater.on('download-progress', (progress) => {
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('update-progress', { percent: Math.round(progress.percent) });
+    }
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('update-downloaded');
+    }
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.log('Auto-updater error:', err.message);
+  });
+
+  // Check for updates 5 seconds after launch
+  setTimeout(() => { autoUpdater.checkForUpdates().catch(() => {}); }, 5000);
 });
 
 // DB query/run
@@ -989,4 +1019,35 @@ ipcMain.handle('gmap-directions', async (e, origin, destination, waypoints) => {
   });
 });
 
+// ---- Auto-Update IPC ----
+ipcMain.handle('update-download', () => {
+  autoUpdater.downloadUpdate().catch(() => {});
+  return { ok: true };
+});
+
+ipcMain.handle('update-install', () => {
+  autoUpdater.quitAndInstall(false, true);
+  return { ok: true };
+});
+
+ipcMain.handle('get-app-version', () => {
+  return { version: app.getVersion() };
+});
+
 app.on('window-all-closed', () => { if (db) db.close(); if (process.platform !== 'darwin') app.quit(); });
+
+// Load seed data (sample data for testing)
+ipcMain.handle('load-seed-data', async () => {
+  try {
+    const seedPath = path.join(__dirname, '..', 'seed-data.sql');
+    if (!fs.existsSync(seedPath)) return { ok: false, error: 'seed-data.sql not found' };
+    const sql = fs.readFileSync(seedPath, 'utf8');
+    // Split by semicolons and run each statement
+    const stmts = sql.split(';').map(s => s.trim()).filter(s => s && !s.startsWith('--'));
+    let executed = 0;
+    for (const stmt of stmts) {
+      try { db.exec(stmt); executed++; } catch (e) { console.log('Seed skip:', e.message); }
+    }
+    return { ok: true, executed };
+  } catch (e) { return { ok: false, error: e.message }; }
+});

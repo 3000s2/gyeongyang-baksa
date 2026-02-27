@@ -1,8 +1,8 @@
 {
-  "name": "my-business-doctor",
-  "version": "4.0.0",
-  "description": "My Business Doctor - Inventory & Order Management",
-  "author": "My Business Doctor",
+  "name": "gyeongyang-baksa",
+  "version": "4.5.0",
+  "description": "나만의 경영박사 — Business Management App",
+  "author": "3000s2",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
@@ -10,10 +10,12 @@
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
+    "dist": "electron-builder --win --publish always",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",
+    "electron-updater": "^6.8.3",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
@@ -21,19 +23,23 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.mybusinessdoctor.app",
-    "productName": "My Business Doctor",
+    "appId": "com.gyeongyangbaksa.app",
+    "productName": "나만의 경영박사",
     "directories": {
       "output": "dist"
     },
     "files": [
       "**/*",
       "!dist/**",
-      "!seed-sample.js",
       "!setup.bat",
       "!build.bat",
       "!*.md"
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "3000s2",
+      "repo": "gyeongyang-baksa"
+    },
     "win": {
       "target": "nsis",
       "icon": "src/icon.ico"
