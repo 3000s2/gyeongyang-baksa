@@ -1035,19 +1035,3 @@ ipcMain.handle('get-app-version', () => {
 });
 
 app.on('window-all-closed', () => { if (db) db.close(); if (process.platform !== 'darwin') app.quit(); });
-
-// Load seed data (sample data for testing)
-ipcMain.handle('load-seed-data', async () => {
-  try {
-    const seedPath = path.join(__dirname, '..', 'seed-data.sql');
-    if (!fs.existsSync(seedPath)) return { ok: false, error: 'seed-data.sql not found' };
-    const sql = fs.readFileSync(seedPath, 'utf8');
-    // Split by semicolons and run each statement
-    const stmts = sql.split(';').map(s => s.trim()).filter(s => s && !s.startsWith('--'));
-    let executed = 0;
-    for (const stmt of stmts) {
-      try { db.exec(stmt); executed++; } catch (e) { console.log('Seed skip:', e.message); }
-    }
-    return { ok: true, executed };
-  } catch (e) { return { ok: false, error: e.message }; }
-});

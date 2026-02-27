@@ -6,6 +6,7 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
+    "test": "node tests/test.js",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
@@ -15,7 +16,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",
-    "electron-updater": "^6.8.3",
+    "electron-updater": "^6.3.9",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

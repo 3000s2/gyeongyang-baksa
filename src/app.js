@@ -254,14 +254,6 @@ async function loadCompanyInfo(){destroyCharts();$('#hd').innerText='Company Inf
     <div id="ciStoreCoords" style="font-size:.85em;color:var(--text-muted);margin-top:4px">${ci.store_lat&&ci.store_lat!==0?`✅ ${ci.store_lat.toFixed(6)}, ${ci.store_lng.toFixed(6)}`:''}</div>
     <div style="text-align:right;margin-top:16px"><button class="btn green" onclick="saveGmapSettings()">Save Maps Settings</button></div>
     <div id="ciGmapMsg"></div>
-  </div>
-  <div class="card" style="max-width:650px;margin-top:20px">
-    <h3 style="font-size:1em;margin-bottom:12px">🧪 Sample Data (테스트용)</h3>
-    <div class="info-box warn">한식당 "서울맛집" 샘플 데이터를 로드합니다. 고객 13명, 메뉴 15개, PO 30건, 경비 15건, 원자재 20종, 입출고 이력 32건이 추가됩니다. <strong>기존 데이터가 있으면 중복될 수 있으니 빈 DB에서 사용하세요.</strong></div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn" onclick="loadSeed()" style="background:#9B59B6;color:#fff">🚀 Load Sample Data</button>
-    </div>
-    <div id="ciSeedMsg"></div>
   </div>`;
 }
 
@@ -301,19 +293,6 @@ window.saveGmapSettings=async()=>{
   await api.run("UPDATE company_info SET gmap_api_key=?,store_address=? WHERE id=1",[key,addr]);
   $('#ciGmapMsg').innerHTML='<div class="info-box success" style="margin-top:8px">✅ Maps settings saved</div>';
   setTimeout(()=>{const m=$('#ciGmapMsg');if(m)m.innerHTML='';},2000);
-};
-
-window.loadSeed=async()=>{
-  if(!confirm('샘플 데이터를 로드합니다. 빈 DB에서 실행하는 것을 권장합니다.\n계속하시겠습니까?'))return;
-  const msg=$('#ciSeedMsg');
-  if(msg) msg.innerHTML='<div class="info-box" style="margin-top:8px">⏳ Loading sample data...</div>';
-  const r=await api.loadSeedData();
-  if(r.ok){
-    if(msg) msg.innerHTML=`<div class="info-box success" style="margin-top:8px">✅ 샘플 데이터 로드 완료! (${r.executed} statements) — 페이지를 새로고침하세요.</div>`;
-    setTimeout(()=>location.reload(),2000);
-  } else {
-    if(msg) msg.innerHTML=`<div class="info-box err" style="margin-top:8px">❌ ${r.error}</div>`;
-  }
 };
 
 // ============================================================
