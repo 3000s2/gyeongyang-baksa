@@ -20,7 +20,6 @@ contextBridge.exposeInMainWorld('api', {
   onGlfAutoPoll: (callback) => ipcRenderer.on('glf-auto-poll-result', (e, result) => callback(result)),
   gmapGeocode: (address) => ipcRenderer.invoke('gmap-geocode', address),
   gmapDirections: (origin, destination, waypoints) => ipcRenderer.invoke('gmap-directions', origin, destination, waypoints),
-  loadSeedData: () => ipcRenderer.invoke('load-seed-data'),
   updateDownload: () => ipcRenderer.invoke('update-download'),
   updateInstall: () => ipcRenderer.invoke('update-install'),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
