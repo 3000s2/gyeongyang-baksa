@@ -26,6 +26,27 @@ if(window.api?.onGlfAutoPoll){
   });
 }
 
+// ---- Auto-Update UI ----
+if(window.api?.onUpdateAvailable){
+  window.api.onUpdateAvailable((info)=>{
+    let bar=document.getElementById('updateBar');
+    if(!bar){
+      bar=document.createElement('div');bar.id='updateBar';
+      bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999999;background:#2980B9;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:0.9em;box-shadow:0 2px 8px rgba(0,0,0,0.2)';
+      document.body.appendChild(bar);
+      document.body.style.paddingTop='44px';
+    }
+    bar.innerHTML=`🔄 새 버전 <strong>v${info.version}</strong>이 있습니다. <button onclick="window.api.updateDownload();this.parentElement.querySelector('.ub').style.display='inline-block';this.disabled=true;this.textContent='다운로드 중...'" style="background:#fff;color:#2980B9;border:none;padding:5px 14px;border-radius:4px;cursor:pointer;font-weight:bold">업데이트</button> <button onclick="this.parentElement.remove();document.body.style.paddingTop='0'" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.5);padding:5px 10px;border-radius:4px;cursor:pointer">나중에</button> <span class="ub" style="display:none;margin-left:8px"><span id="updatePct">0</span>%</span>`;
+  });
+  window.api.onUpdateProgress((info)=>{
+    const el=document.getElementById('updatePct');if(el)el.textContent=info.percent;
+  });
+  window.api.onUpdateDownloaded(()=>{
+    const bar=document.getElementById('updateBar');
+    if(bar) bar.innerHTML=`✅ 다운로드 완료! <button onclick="window.api.updateInstall()" style="background:#fff;color:#27AE60;border:none;padding:5px 14px;border-radius:4px;cursor:pointer;font-weight:bold">지금 재시작</button> <span style="font-size:.85em">앱을 닫으면 자동 설치됩니다</span>`;
+  });
+}
+
 const _f={
   dash:{from:monthAgo(1),to:today(),cid:'',cname:''},
   po:{from:monthAgo(3),to:today(),sr:''},
@@ -233,6 +254,14 @@ async function loadCompanyInfo(){destroyCharts();$('#hd').innerText='Company Inf
     <div id="ciStoreCoords" style="font-size:.85em;color:var(--text-muted);margin-top:4px">${ci.store_lat&&ci.store_lat!==0?`✅ ${ci.store_lat.toFixed(6)}, ${ci.store_lng.toFixed(6)}`:''}</div>
     <div style="text-align:right;margin-top:16px"><button class="btn green" onclick="saveGmapSettings()">Save Maps Settings</button></div>
     <div id="ciGmapMsg"></div>
+  </div>
+  <div class="card" style="max-width:650px;margin-top:20px">
+    <h3 style="font-size:1em;margin-bottom:12px">🧪 Sample Data (테스트용)</h3>
+    <div class="info-box warn">한식당 "서울맛집" 샘플 데이터를 로드합니다. 고객 13명, 메뉴 15개, PO 30건, 경비 15건, 원자재 20종, 입출고 이력 32건이 추가됩니다. <strong>기존 데이터가 있으면 중복될 수 있으니 빈 DB에서 사용하세요.</strong></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" onclick="loadSeed()" style="background:#9B59B6;color:#fff">🚀 Load Sample Data</button>
+    </div>
+    <div id="ciSeedMsg"></div>
   </div>`;
 }
 
@@ -272,6 +301,19 @@ window.saveGmapSettings=async()=>{
   await api.run("UPDATE company_info SET gmap_api_key=?,store_address=? WHERE id=1",[key,addr]);
   $('#ciGmapMsg').innerHTML='<div class="info-box success" style="margin-top:8px">✅ Maps settings saved</div>';
   setTimeout(()=>{const m=$('#ciGmapMsg');if(m)m.innerHTML='';},2000);
+};
+
+window.loadSeed=async()=>{
+  if(!confirm('샘플 데이터를 로드합니다. 빈 DB에서 실행하는 것을 권장합니다.\n계속하시겠습니까?'))return;
+  const msg=$('#ciSeedMsg');
+  if(msg) msg.innerHTML='<div class="info-box" style="margin-top:8px">⏳ Loading sample data...</div>';
+  const r=await api.loadSeedData();
+  if(r.ok){
+    if(msg) msg.innerHTML=`<div class="info-box success" style="margin-top:8px">✅ 샘플 데이터 로드 완료! (${r.executed} statements) — 페이지를 새로고침하세요.</div>`;
+    setTimeout(()=>location.reload(),2000);
+  } else {
+    if(msg) msg.innerHTML=`<div class="info-box err" style="margin-top:8px">❌ ${r.error}</div>`;
+  }
 };
 
 // ============================================================
@@ -2016,3 +2058,11 @@ function load(p){switch(p){
   case'backup':return loadBackup();
 }}
 load('dash');
+
+// Show app version in sidebar
+if(window.api?.getAppVersion){
+  window.api.getAppVersion().then(r=>{
+    const el=document.getElementById('appVer');
+    if(el&&r.version) el.textContent=`v${r.version} | 나만의 경영박사`;
+  });
+}
