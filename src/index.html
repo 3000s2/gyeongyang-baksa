@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>나만의 경영박사</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">🎓 나만의 경영박사</div>
+    <div class="nav-section">메인</div>
+    <div class="nav active" onclick="nav('dash',this)">📊 대시보드</div>
+    <div class="nav-section">관리</div>
+    <div class="nav" onclick="nav('materials',this)">🧪 원자재 관리</div>
+    <div class="nav" onclick="nav('cust',this)">🏢 거래처 관리</div>
+    <div class="nav-section">거래</div>
+    <div class="nav" onclick="nav('catalog',this)">📦 제품 등록</div>
+    <div class="nav" onclick="nav('po',this)">📋 PO Create</div>
+    <div class="nav" onclick="nav('expense',this)">💸 Expense</div>
+    <div class="nav-section">분석</div>
+    <div class="nav" onclick="nav('custReport',this)">💰 거래처 리포트</div>
+    <div class="nav" onclick="nav('stockHistory',this)">📋 입출고 이력</div>
+    <div class="nav" onclick="nav('taxReport',this)">📊 세금 보고서</div>
+    <div class="nav-section">설정</div>
+    <div class="nav" onclick="nav('companyInfo',this)">🏠 Company Info</div>
+    <div class="nav" onclick="nav('gloriafood',this)">🍕 GloriaFood</div>
+    <div class="nav" onclick="nav('backup',this)">💾 백업 / 복원</div>
+    <div class="sidebar-footer">v4.5 | 나만의 경영박사</div>
+  </div>
+  <div class="main">
+    <div class="header"><span id="hd">대시보드</span></div>
+    <div class="content" id="ct"></div>
+  </div>
+  <div class="modal" id="mod"><div class="modal-box" id="modBox"></div></div>
+  <script src="app.js"></script>
+</body>
+</html>
