@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Notification, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
@@ -322,6 +322,74 @@ app.whenReady().then(() => {
     webPreferences: { preload: path.join(__dirname, 'preload.js') }
   });
   win.loadFile(path.join(__dirname, '../src/index.html'));
+
+  // ---- Menu Bar ----
+  const menuTemplate = [
+    {
+      label: '파일 (File)',
+      submenu: [
+        { label: '💾 백업', click: () => { win.webContents.send('menu-action', 'backup'); } },
+        { label: '📂 복원', click: () => { win.webContents.send('menu-action', 'restore'); } },
+        { type: 'separator' },
+        { label: '종료', accelerator: 'CmdOrCtrl+Q', click: () => app.quit() }
+      ]
+    },
+    {
+      label: '편집 (Edit)',
+      submenu: [
+        { label: '실행 취소', accelerator: 'CmdOrCtrl+Z', role: 'undo' },
+        { label: '다시 실행', accelerator: 'CmdOrCtrl+Shift+Z', role: 'redo' },
+        { type: 'separator' },
+        { label: '잘라내기', accelerator: 'CmdOrCtrl+X', role: 'cut' },
+        { label: '복사', accelerator: 'CmdOrCtrl+C', role: 'copy' },
+        { label: '붙여넣기', accelerator: 'CmdOrCtrl+V', role: 'paste' },
+        { label: '전체 선택', accelerator: 'CmdOrCtrl+A', role: 'selectAll' }
+      ]
+    },
+    {
+      label: '도움말 (Help)',
+      submenu: [
+        {
+          label: '📖 사용 가이드',
+          click: () => { win.webContents.send('menu-action', 'guide'); }
+        },
+        { type: 'separator' },
+        {
+          label: '📞 Contact Us',
+          click: () => {
+            dialog.showMessageBox(win, {
+              type: 'info',
+              title: 'Contact Us',
+              message: '나만의 경영박사 — 고객 지원',
+              detail: [
+                '이메일: your-email@example.com',
+                '전화: 000-000-0000',
+                '웹사이트: www.example.com',
+                '',
+                '문의사항이나 버그 리포트는',
+                '위 연락처로 보내주세요.'
+              ].join('\n'),
+              buttons: ['확인']
+            });
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'ℹ️ About',
+          click: () => {
+            dialog.showMessageBox(win, {
+              type: 'info',
+              title: 'About',
+              message: `나만의 경영박사 v${app.getVersion()}`,
+              detail: '중소기업 맞춤 경영 관리 솔루션\n© 2026 All rights reserved.',
+              buttons: ['확인']
+            });
+          }
+        }
+      ]
+    }
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
   autoBackup();
   setInterval(autoBackup, 30 * 60 * 1000);

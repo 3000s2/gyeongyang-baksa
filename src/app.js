@@ -47,6 +47,32 @@ if(window.api?.onUpdateAvailable){
   });
 }
 
+// ---- Menu Bar Actions ----
+if(window.api?.onMenuAction){
+  window.api.onMenuAction((action)=>{
+    switch(action){
+      case 'backup': nav('backup',document.querySelector('.nav[onclick*="backup"]')); window.doBackup?.(); break;
+      case 'restore': nav('backup',document.querySelector('.nav[onclick*="backup"]')); window.doRestore?.(); break;
+      case 'guide': openM(`<h3>📖 사용 가이드</h3>
+        <div style="max-height:60vh;overflow-y:auto;line-height:1.8">
+          <h4>📊 대시보드</h4><p>매출 현황, 인기 제품, 저재고 알림을 한눈에 확인합니다.</p>
+          <h4>🧪 원자재 관리</h4><p>원자재 등록, 입고/출고 기록, 저재고 알림 설정.</p>
+          <h4>🏢 거래처 관리</h4><p>개인(C)/거래처(I) 고객 등록. 거래처는 할인율과 Invoice 발행 가능.</p>
+          <h4>📦 제품 등록</h4><p>판매 제품(메뉴) 등록 및 가격 설정.</p>
+          <h4>📋 PO Create</h4><p>주문 생성, 결제 관리, 배달 상태 추적. 🚚 배달전 버튼으로 미배달 주문만 필터링.</p>
+          <h4>💸 Expense</h4><p>경비 등록. 세금(HST/GST/PST) 자동 계산.</p>
+          <h4>💰 거래처 리포트</h4><p>특정 고객의 구매 패턴, 월별 추이 분석.</p>
+          <h4>📊 세금 보고서</h4><p>T2125 기반 세금 보고 자료 생성. Excel 내보내기 가능.</p>
+          <h4>🍕 GloriaFood</h4><p>온라인 주문 자동 연동. API Key 설정 후 자동 폴링.</p>
+          <h4>🚚 배달 최적화</h4><p>Google Maps 기반 배달 경로 최적화. Settings에서 API Key 설정 필요.</p>
+          <h4>💾 백업 / 복원</h4><p>수동 백업 및 복원. 자동 백업은 30분마다 실행됩니다.</p>
+        </div>
+        <div style="text-align:right;margin-top:16px"><button class="btn gray" onclick="closeM()">닫기</button></div>`, 'modal-lg');
+        break;
+    }
+  });
+}
+
 const _f={
   dash:{from:monthAgo(1),to:today(),cid:'',cname:''},
   po:{from:monthAgo(3),to:today(),sr:''},
