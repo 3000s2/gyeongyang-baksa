@@ -1,6 +1,6 @@
 {
   "name": "gyeongyang-baksa",
-  "version": "4.5.0",
+  "version": "4.6.0",
   "description": "나만의 경영박사 — Business Management App",
   "author": "3000s2",
   "main": "electron/main.js",
